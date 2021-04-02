@@ -6,7 +6,7 @@ from tkinter import filedialog
 root = Tk()
 root.title('MusicPlayer')
 root.geometry('500x300')
-root.resizable(0, 0)
+# root.resizable(0, 0)
 root.configure(bg='#f2f0ed')
 
 f2 = Frame(root)
@@ -115,6 +115,8 @@ root.config(menu=myMenu)
 addSong = Menu(myMenu)
 myMenu.add_cascade(label="Add Song", menu=addSong)
 addSong.add_command(label="Add one song", command=addSondFun)
+
+andjela=1
 
 f1.tkraise()
 
