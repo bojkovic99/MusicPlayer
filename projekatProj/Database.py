@@ -1,9 +1,13 @@
 import pymongo
+from io import BytesIO
+import numpy as np
+from scipy.io.wavfile import read
 
 client = pymongo.MongoClient()
 
 mydb = client["userdb"]
 mycol = mydb["users"]
+
 
 class User:
     def __init__(self, name, surname, username):
@@ -23,6 +27,7 @@ def insert(u):
         print("Postoji korisnicko ime")
         return 0
 
+
 def loginDb(username):
     res = mycol.find_one({"username": username})
 
@@ -34,6 +39,24 @@ def loginDb(username):
         return x
 
 
+def addSongDB(song, username):
+    # rate, data = read(BytesIO(song))
+    # mycol.update_one({"username": "valz"}, {"$push": {"songs": data.tolist(), "rate": rate}})
+    mycol.update_one({"username": username}, {"$push": {"songs": song}})
+    mycol.update_one({"username": username}, {"$inc": {"numSong": 1}})
+    print(username)
+
+
+def getAllSongs(username):
+    res = mycol.find_one({"username": username})
+    if res is None:
+        return None
+
+    else:
+        if res["numSong"] == 0:
+            return None
+        else:
+            return res["songs"]
 
 # mycol2.insert_one(t.__dict__)
 # mycol2.update_one({"_id":1},{"$push":{"niz":5}})

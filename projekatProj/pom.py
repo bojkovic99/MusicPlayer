@@ -6,22 +6,30 @@ from Database import *
 
 curUser = User("", "", "")
 
+pathSongFile = 'C:/Users/Korisnik/Desktop/faks/music'
+
 
 def contain(item):
     iscontain = item in app.getFrame2().getSL().get(0, "end")
     return iscontain
 
+def showMySongs():
+    app.getFrame2().addSongsFromDB()
+    app.getFrame2().tkraise()
 
-def addSondFun():
-    song = filedialog.askopenfilename(initialdir='C:/Users/Korisnik/Desktop/faks/music', title="Choos a song",
+
+def addSongFun():
+    app.getFrame2().addSongsFromDB()
+    song = filedialog.askopenfilename(initialdir=f'{pathSongFile}', title="Choos a song",
                                       filetypes=(("mp3 files", "*.mp3"),))
 
-    song = song.replace("C:/Users/Korisnik/Desktop/faks/music/", "")
+    song = song.replace(f"{pathSongFile}/", "")
     song = song.replace(".mp3", "")
+    allPathSong = song
     if (not (contain(song))):
-        app.getFrame2().getSL().insert(END, song)
+        addSongDB(allPathSong, app.getLoginPage().getCurusername())
 
-    print("Caoo")
+        app.getFrame2().getSL().insert(END, song)
 
     app.getFrame2().tkraise()
 
@@ -31,7 +39,7 @@ def playSongF2():
     if selection:
         song = app.getFrame2().getSL().get(ACTIVE)
         songCut = song
-        song = f'C:/Users/Korisnik/Desktop/faks/music/{song}.mp3'
+        song = f'{pathSongFile}/{song}.mp3'
         pygame.mixer.music.load(song)
         pygame.mixer.music.play(loops=0)
         app.getFrame1().songName.configure(text=f'{songCut}')
@@ -69,15 +77,19 @@ class MusicPlayerApp:
             frame.grid(row=0, column=0, sticky="nsew")
 
         # self.show_frame(Page1)
-
+        # Menu
         myMenu = Menu(root)
         root.config(menu=myMenu)
 
         addSong = Menu(myMenu)
+        shSongs = Menu(myMenu)
         myMenu.add_cascade(label="Add Song", menu=addSong)
-        addSong.add_command(label="Add one song", command=addSondFun)
+        addSong.add_command(label="Add one song", command=addSongFun)
+        myMenu.add_cascade(label="My Songs", menu=shSongs)
+        shSongs.add_command(label="Show My Songs", command=showMySongs)
         pygame.mixer.init()
         self.frames[StartPage].tkraise()
+
 
     def show_frame(self, cont):
         frame = self.frames[cont]
@@ -102,6 +114,8 @@ class MusicPlayerApp:
 class Page1(Frame):
     def __init__(self, parent, root):
         Frame.__init__(self, parent)
+
+
         # Images
         self.playImg = ImageTk.PhotoImage(Image.open('images/blackPlay.png').resize((60, 60)))
         self.nextImg = ImageTk.PhotoImage(Image.open('images/blackNext.png').resize((40, 40)))
@@ -131,6 +145,8 @@ class Page1(Frame):
         self.playBtn.grid(row=3, column=1)
         self.nextBtn.grid(row=3, column=2)
 
+
+
     def getSName(self):
         return self.songName
 
@@ -140,8 +156,8 @@ class Page2(Frame):
     def __init__(self, parent, root):
         Frame.__init__(self, parent)
         # F2 SongList
-
         self.songList = Listbox(self, bg='#492a57', fg="white", width=80, height=12, selectforeground="red")
+
         self.songList.grid(row=1, column=0, columnspan=3, pady=10, padx=10)
         self.playBtn2 = Button(self, text="Play song", bg='#adacad', width=12, pady=5, highlightbackground="#918e91",
                                fg="#5e3670",
@@ -150,6 +166,13 @@ class Page2(Frame):
 
     def getSL(self):
         return self.songList
+
+    def addSongsFromDB(self):
+        songs = getAllSongs(app.getLoginPage().getCurusername())
+        if songs is not None:
+            for s in songs:
+                if (not (contain(s))):
+                    self.songList.insert(END, s)
 
 
 class StartPage(Frame):
@@ -167,6 +190,7 @@ class StartPage(Frame):
 
     def loginFun(self):
         app.getLoginPage().tkraise()
+
 
 
 class RegisterPage(Frame):
@@ -196,24 +220,29 @@ class RegisterPage(Frame):
         self.btn = Button(self, text="Submit", bg='#f2f0ed', fg="black", command=self.submitFun)
         self.btn.grid(row=5, column=1)
 
+        self.empty = Label(self, text="     ")
+        self.empty.grid(row=6, column=0)
+
     def submitFun(self):
-        if (self.nameentry.get() == "" or self.surnameentry.get()  ==  "" or self.usernameentry.get()  ==  "") :
-            print("Nisu sva polja uneta")
+        if (self.nameentry.get() == "" or self.surnameentry.get() == "" or self.usernameentry.get() == ""):
+            emptyInput = Label(self, text="Please, fill the all fields!")
+            emptyInput.grid(row=7, column=1)
             return
 
         u = User(self.nameentry.get(), self.surnameentry.get(), self.usernameentry.get())
         correct = insert(u)
         if correct == 1:
-            curUser = u
             app.getFrame1().tkraise()
-        else :
+        else:
+            userExist = Label(self, text="Username already exists!")
+            userExist.grid(row=7, column=1)
             return
-
 
 
 class LoginPage(Frame):
     def __init__(self, parent, root):
         Frame.__init__(self, parent)
+        self.curUsername = ""
         self.emptyL = Label(self, text="     ")
         self.emptyL.grid(row=0, column=0)
         self.username = Label(self, text="Userame      ")
@@ -236,8 +265,12 @@ class LoginPage(Frame):
             print("Prazan User")
         else:
             curUser = pomUser
+            self.curUsername = self.usernameentry.get()
+
             app.getFrame1().tkraise()
-            print("Uspesan login")
+
+    def getCurusername(self):
+        return self.curUsername
 
 
 app = MusicPlayerApp()
