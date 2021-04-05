@@ -47,6 +47,12 @@ def addSongDB(song, username):
     print(username)
 
 
+def deleteSongDB(song, username):
+    print(song + " " + username)
+    mycol.update_one({"username": username}, {"$pull": {"songs": song}})
+    mycol.update_one({"username": username}, {"$inc": {"numSong": (-1)}})
+
+
 def getAllSongs(username):
     res = mycol.find_one({"username": username})
     if res is None:

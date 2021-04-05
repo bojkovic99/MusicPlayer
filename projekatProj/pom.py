@@ -13,8 +13,19 @@ def contain(item):
     iscontain = item in app.getFrame2().getSL().get(0, "end")
     return iscontain
 
+
 def showMySongs():
     app.getFrame2().addSongsFromDB()
+    app.getFrame2().replace_menu()
+    app.getFrame2().tkraise()
+
+
+def removeSongFun():
+    song = app.getFrame2().getSL().get(ANCHOR)
+    app.getFrame2().getSL().delete(ANCHOR)
+    if song is not None:
+        deleteSongDB(song, app.getLoginPage().getCurusername())
+
     app.getFrame2().tkraise()
 
 
@@ -27,10 +38,11 @@ def addSongFun():
     song = song.replace(".mp3", "")
     allPathSong = song
     if (not (contain(song))):
+        print("Nije nasao pesmu")
         addSongDB(allPathSong, app.getLoginPage().getCurusername())
 
         app.getFrame2().getSL().insert(END, song)
-
+    app.getFrame2().replace_menu()
     app.getFrame2().tkraise()
 
 
@@ -44,6 +56,7 @@ def playSongF2():
         pygame.mixer.music.play(loops=0)
         app.getFrame1().songName.configure(text=f'{songCut}')
         app.getFrame1().playBtn.configure(image=app.getFrame1().pauseImg, command=pauseSongF1)
+        app.getFrame1().removeSongs.entryconfig("Remove One Song", state="disabled")
         app.getFrame1().tkraise()
     else:
         print("Nista nije selektovano")
@@ -59,37 +72,90 @@ def pauseSongF1():
     app.getFrame1().playBtn.configure(image=app.getFrame1().playImg, command=playSongF1)
 
 
+def playPrevSong():
+    song2 = app.getFrame2().getSL().get(ACTIVE)
+    if song2 == app.getFrame2().getSL().get(0):
+        song = app.getFrame2().getSL().get("end")
+        nextOne = app.getFrame2().getSL().index("end") - 1  # index dohvata duzinu
+        print(nextOne)
+    else:
+        nextOne = app.getFrame2().getSL().curselection()
+        nextOne = nextOne[0] - 1
+        song = app.getFrame2().getSL().get(nextOne)
+
+    songCut = song
+    song = f'{pathSongFile}/{song}.mp3'
+    pygame.mixer.music.load(song)
+    pygame.mixer.music.play(loops=0)
+    app.getFrame1().songName.configure(text=f'{songCut}')
+    app.getFrame1().playBtn.configure(image=app.getFrame1().pauseImg, command=pauseSongF1)
+
+    app.getFrame2().getSL().selection_clear(0, END)
+    app.getFrame2().getSL().activate(nextOne)
+    app.getFrame2().getSL().selection_set(nextOne, last=None)
+
+
+def playNextSong():
+    song2 = app.getFrame2().getSL().get(ACTIVE)
+    if song2 == app.getFrame2().getSL().get("end"):
+        song = app.getFrame2().getSL().get(0)
+        nextOne = 0
+    else:
+        nextOne = app.getFrame2().getSL().curselection()
+        nextOne = nextOne[0] + 1
+        song = app.getFrame2().getSL().get(nextOne)
+
+    songCut = song
+    song = f'{pathSongFile}/{song}.mp3'
+    pygame.mixer.music.load(song)
+    pygame.mixer.music.play(loops=0)
+    app.getFrame1().songName.configure(text=f'{songCut}')
+    app.getFrame1().playBtn.configure(image=app.getFrame1().pauseImg, command=pauseSongF1)
+
+    app.getFrame2().getSL().selection_clear(0, END)
+    app.getFrame2().getSL().activate(nextOne)
+    app.getFrame2().getSL().selection_set(nextOne, last=None)
+
+
 class MusicPlayerApp:
     root1 = Tk()
 
     def __init__(self):
-        root = self.root1
-        root.title('MusicPlayer')
-        root.geometry('500x300')
-        root.resizable(0, 0)
-        root.configure(bg='#f2f0ed')
+        self.root = self.root1
+        self.root.title('MusicPlayer')
+        self.root.geometry('500x300')
+        self.root.resizable(0, 0)
+        self.root.configure(bg='#f2f0ed')
 
         self.frames = {}
 
         for F in (StartPage, Page1, Page2, RegisterPage, LoginPage):
-            frame = F(root, self)
+            frame = F(self.root, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
 
         # self.show_frame(Page1)
         # Menu
-        myMenu = Menu(root)
-        root.config(menu=myMenu)
+        #  myMenu = Menu(root)
+        # root.config(menu=myMenu)
 
-        addSong = Menu(myMenu)
-        shSongs = Menu(myMenu)
-        myMenu.add_cascade(label="Add Song", menu=addSong)
-        addSong.add_command(label="Add one song", command=addSongFun)
-        myMenu.add_cascade(label="My Songs", menu=shSongs)
-        shSongs.add_command(label="Show My Songs", command=showMySongs)
+        # addSong = Menu(myMenu)
+        # shSongs = Menu(myMenu)
+        # myMenu.add_cascade(label="Add Song", menu=addSong)
+        # addSong.add_command(label="Add one song", command=addSongFun)
+        # myMenu.add_cascade(label="My Songs", menu=shSongs)
+        # shSongs.add_command(label="Show My Songs", command=showMySongs)
         pygame.mixer.init()
         self.frames[StartPage].tkraise()
 
+        self.create_menu()
+
+    def create_menu(self):
+        print("Create menu")
+        self.menubar = Menu(self.root)
+        self.root.config(menu=self.menubar)
+        # self.menubar.add_command(label='')
+        self.menu = self.menubar
 
     def show_frame(self, cont):
         frame = self.frames[cont]
@@ -115,8 +181,9 @@ class Page1(Frame):
     def __init__(self, parent, root):
         Frame.__init__(self, parent)
 
-
         # Images
+        self.parent = parent
+        self.root = root
         self.playImg = ImageTk.PhotoImage(Image.open('images/blackPlay.png').resize((60, 60)))
         self.nextImg = ImageTk.PhotoImage(Image.open('images/blackNext.png').resize((40, 40)))
 
@@ -135,8 +202,8 @@ class Page1(Frame):
 
         # F1 Buttons
 
-        self.prevBtn = Button(self, image=self.prevImg, bg='#f2f0ed', borderwidth=0)
-        self.nextBtn = Button(self, image=self.nextImg, bg='#f2f0ed', borderwidth=0)
+        self.prevBtn = Button(self, image=self.prevImg, bg='#f2f0ed', borderwidth=0, command=playPrevSong)
+        self.nextBtn = Button(self, image=self.nextImg, bg='#f2f0ed', borderwidth=0, command=playNextSong)
         self.playBtn = Button(self, image=self.playImg, bg='#f2f0ed', borderwidth=0, command=playSongF1)
 
         self.pauseBtn = Button(self, image=self.pauseImg, bg='#f2f0ed', borderwidth=0)
@@ -145,7 +212,23 @@ class Page1(Frame):
         self.playBtn.grid(row=3, column=1)
         self.nextBtn.grid(row=3, column=2)
 
+    def replace_menu(self):
+        self.menubar = app.menubar
+        addSong = Menu(self.menubar)
+        shSongs = Menu(self.menubar)
+        self.removeSongs = Menu(self.menubar)
+        self.menubar.add_cascade(label="Add Song", menu=addSong)
+        addSong.add_command(label="Add one song", command=addSongFun)
 
+        self.menubar.add_cascade(label="Remove Song", menu=self.removeSongs)
+        self.removeSongs.add_command(label="Remove One Song", command=removeSongFun)
+
+        self.removeSongs.entryconfig("Remove One Song", state = "disabled")
+
+        self.menubar.add_cascade(label="My Songs", menu=shSongs)
+        shSongs.add_command(label="Show My Songs", command=showMySongs)
+
+        self.master.menu = self.menubar
 
     def getSName(self):
         return self.songName
@@ -156,13 +239,24 @@ class Page2(Frame):
     def __init__(self, parent, root):
         Frame.__init__(self, parent)
         # F2 SongList
-        self.songList = Listbox(self, bg='#492a57', fg="white", width=80, height=12, selectforeground="red")
+        self.songList = Listbox(self, bg='#492a57', fg="white", width=80, height=12, selectforeground="white",
+                                selectbackground="#918e91")
 
         self.songList.grid(row=1, column=0, columnspan=3, pady=10, padx=10)
         self.playBtn2 = Button(self, text="Play song", bg='#adacad', width=12, pady=5, highlightbackground="#918e91",
                                fg="#5e3670",
                                font=('bold'), command=playSongF2)
         self.playBtn2.grid(row=2, column=1)
+
+    def replace_menu(self):
+        self.menubar = app.getFrame1().menubar
+        addSong = Menu(self.menubar)
+        shSongs = Menu(self.menubar)
+        removeSongs = Menu(self.menubar)
+
+        app.getFrame1().removeSongs.entryconfig("Remove One Song", state="normal")
+
+        self.master.menu = self.menubar
 
     def getSL(self):
         return self.songList
@@ -190,7 +284,6 @@ class StartPage(Frame):
 
     def loginFun(self):
         app.getLoginPage().tkraise()
-
 
 
 class RegisterPage(Frame):
@@ -232,6 +325,7 @@ class RegisterPage(Frame):
         u = User(self.nameentry.get(), self.surnameentry.get(), self.usernameentry.get())
         correct = insert(u)
         if correct == 1:
+            app.getFrame1().replace_menu()
             app.getFrame1().tkraise()
         else:
             userExist = Label(self, text="Username already exists!")
@@ -267,6 +361,7 @@ class LoginPage(Frame):
             curUser = pomUser
             self.curUsername = self.usernameentry.get()
 
+            app.getFrame1().replace_menu()
             app.getFrame1().tkraise()
 
     def getCurusername(self):
