@@ -2,7 +2,7 @@ from tkinter import *
 from PIL import ImageTk, Image
 import pygame
 from tkinter import filedialog
-from Database import *
+from FaceRecognition import *
 
 curUser = User("", "", "")
 
@@ -283,7 +283,12 @@ class StartPage(Frame):
         app.getRegisterPage().tkraise()
 
     def loginFun(self):
+
+
         app.getLoginPage().tkraise()
+        # app.getLoginPage().faceR.run()
+
+
 
 
 class RegisterPage(Frame):
@@ -310,32 +315,56 @@ class RegisterPage(Frame):
         self.empty = Label(self, text="     ")
         self.empty.grid(row=4, column=0)
 
-        self.btn = Button(self, text="Submit", bg='#f2f0ed', fg="black", command=self.submitFun)
-        self.btn.grid(row=5, column=1)
+        self.btn = Button(self, text="Submit", bg='#f2f0ed', fg="black", command=self.submitFun, state="disabled")
+        self.btn.grid(row=5, column=0)
+        self.checkUsernameBtn = Button(self, text="C", bg='#f2f0ed', fg="black", command=self.checkUsername)
+        self.checkUsernameBtn.grid(row=3, column=2)
+
+        self.btnWebCam = Button(self, text="Web cam", bg='#f2f0ed', fg="black", command=self.openWebCam, state="disabled")
+        self.btnWebCam.grid(row=5, column=1)
 
         self.empty = Label(self, text="     ")
         self.empty.grid(row=6, column=0)
+        self.emptyInput = Label(self, text="Please, first enter your username!")
+        self.emptyInput.grid(row=7, column=1)
 
     def submitFun(self):
         if (self.nameentry.get() == "" or self.surnameentry.get() == "" or self.usernameentry.get() == ""):
-            emptyInput = Label(self, text="Please, fill the all fields!")
-            emptyInput.grid(row=7, column=1)
+            self.emptyInput.configure(text="Please, fill the all fields!")
             return
 
         u = User(self.nameentry.get(), self.surnameentry.get(), self.usernameentry.get())
         correct = insert(u)
         if correct == 1:
             app.getFrame1().replace_menu()
+            app.getLoginPage().curUsername=self.usernameentry.get()
             app.getFrame1().tkraise()
         else:
-            userExist = Label(self, text="Username already exists!")
-            userExist.grid(row=7, column=1)
+            self.emptyInput.configure(text="Username already exists!")
             return
+
+    def checkUsername(self):
+        correct = findUser(self.usernameentry.get())
+        if correct == 1 and self.usernameentry.get() != "":
+            # menja se izgled CheckUsernameBtn
+            self.btnWebCam.configure(state="normal")
+            self.emptyInput.configure(text="")
+            self.usernameentry.configure(state="disable")
+        else:
+            # CheckUsernameBtn postaje crven
+            self.emptyInput.configure(text="Username already exists!")
+
+    def openWebCam(self):
+
+        app.getLoginPage().faceR.regRun(self.usernameentry.get())
+        self.emptyInput.configure(text="Your picture is taken and saved!")
+        self.btn.configure(state="normal")
 
 
 class LoginPage(Frame):
     def __init__(self, parent, root):
         Frame.__init__(self, parent)
+
         self.curUsername = ""
         self.emptyL = Label(self, text="     ")
         self.emptyL.grid(row=0, column=0)
@@ -351,6 +380,8 @@ class LoginPage(Frame):
 
         self.btn = Button(self, text="Login", bg='#f2f0ed', fg="black", command=self.loginFun)
         self.btn.grid(row=3, column=1)
+        self.faceR = FaceRecog()
+
 
     def loginFun(self):
         pomUser = loginDb(self.usernameentry.get())

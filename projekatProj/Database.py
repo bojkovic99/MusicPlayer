@@ -7,6 +7,7 @@ client = pymongo.MongoClient()
 
 mydb = client["userdb"]
 mycol = mydb["users"]
+mycol2 = mydb["facerec"]
 
 
 class User:
@@ -16,6 +17,26 @@ class User:
         self.username = username
         self.numSong = 0
         self.songs = []
+
+class User2:
+    def __init__(self, name):
+        self.ime = name
+        self.face = []
+
+def addFaceEnc(coordinate, name):
+    u = User2(name)
+    mycol2.insert({"pole":str(coordinate), "ime":name})
+
+    #      mycol2.update({"ime":name}, {"$push": {"face": coor}})
+
+def getFace(name):
+    res = mycol2.find_one({"ime":name})
+    if res is None:
+        return None
+
+    else:
+       return res["pole"]
+
 
 
 def insert(u):
@@ -27,6 +48,12 @@ def insert(u):
         print("Postoji korisnicko ime")
         return 0
 
+def findUser(username):
+    res = mycol.find_one({"username": username})
+    if res is None:
+        return 1
+    else:
+        return 0
 
 def loginDb(username):
     res = mycol.find_one({"username": username})
