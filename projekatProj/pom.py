@@ -223,7 +223,7 @@ class Page1(Frame):
         self.menubar.add_cascade(label="Remove Song", menu=self.removeSongs)
         self.removeSongs.add_command(label="Remove One Song", command=removeSongFun)
 
-        self.removeSongs.entryconfig("Remove One Song", state = "disabled")
+        self.removeSongs.entryconfig("Remove One Song", state="disabled")
 
         self.menubar.add_cascade(label="My Songs", menu=shSongs)
         shSongs.add_command(label="Show My Songs", command=showMySongs)
@@ -283,17 +283,14 @@ class StartPage(Frame):
         app.getRegisterPage().tkraise()
 
     def loginFun(self):
-
-
         app.getLoginPage().tkraise()
         # app.getLoginPage().faceR.run()
-
-
 
 
 class RegisterPage(Frame):
     def __init__(self, parent, root):
         Frame.__init__(self, parent)
+
         self.emptyL = Label(self, text="     ")
         self.emptyL.grid(row=0, column=0)
         self.name = Label(self, text="Name      ")
@@ -320,7 +317,8 @@ class RegisterPage(Frame):
         self.checkUsernameBtn = Button(self, text="C", bg='#f2f0ed', fg="black", command=self.checkUsername)
         self.checkUsernameBtn.grid(row=3, column=2)
 
-        self.btnWebCam = Button(self, text="Web cam", bg='#f2f0ed', fg="black", command=self.openWebCam, state="disabled")
+        self.btnWebCam = Button(self, text="Web cam", bg='#f2f0ed', fg="black", command=self.openWebCam,
+                                state="disabled")
         self.btnWebCam.grid(row=5, column=1)
 
         self.empty = Label(self, text="     ")
@@ -337,7 +335,7 @@ class RegisterPage(Frame):
         correct = insert(u)
         if correct == 1:
             app.getFrame1().replace_menu()
-            app.getLoginPage().curUsername=self.usernameentry.get()
+            app.getLoginPage().curUsername = self.usernameentry.get()
             app.getFrame1().tkraise()
         else:
             self.emptyInput.configure(text="Username already exists!")
@@ -355,7 +353,7 @@ class RegisterPage(Frame):
             self.emptyInput.configure(text="Username already exists!")
 
     def openWebCam(self):
-
+        self.emptyInput.configure(text="Please, press 'q' if you want to take a picture!")
         app.getLoginPage().faceR.regRun(self.usernameentry.get())
         self.emptyInput.configure(text="Your picture is taken and saved!")
         self.btn.configure(state="normal")
@@ -368,32 +366,38 @@ class LoginPage(Frame):
         self.curUsername = ""
         self.emptyL = Label(self, text="     ")
         self.emptyL.grid(row=0, column=0)
-        self.username = Label(self, text="Userame      ")
-        self.username.grid(row=1, column=0, padx=20)
 
-        self.usernameVar = StringVar
-        self.usernameentry = Entry(self, textvariable=self.usernameVar)
-        self.usernameentry.grid(row=1, column=1)
+        self.btnWebCam = Button(self, text="Web cam", bg='#f2f0ed', fg="black", command=self.setLabel)
+        self.btnWebCam.grid(row=1, column=1)
 
-        self.empty = Label(self, text="     ")
-        self.empty.grid(row=2, column=0)
+        self.eL = Label(self, text="     ")
+        self.eL.grid(row=2, column=0)
 
-        self.btn = Button(self, text="Login", bg='#f2f0ed', fg="black", command=self.loginFun)
-        self.btn.grid(row=3, column=1)
+        self.emptyLabel = Label(self, text=" ... ")
+        self.emptyLabel.grid(row=3, column=1)
+
         self.faceR = FaceRecog()
 
+    def setLabel(self):
+        self.emptyLabel.configure(text="Please, press 'q' if you want to log in!")
+        self.openWebCam()
 
-    def loginFun(self):
-        pomUser = loginDb(self.usernameentry.get())
-        if pomUser is None:
-            app.getLoginPage()
-            print("Prazan User")
+    def openWebCam(self):
+        loginUsername = app.getLoginPage().faceR.run()
+        if loginUsername != "":
+            foundUser = loginDb(loginUsername)
+            print(loginUsername)
+            if foundUser is None:
+                app.getLoginPage()
+                print("Prazan User")
+            else:
+                curUser = foundUser
+                self.curUsername = loginUsername
+
+                app.getFrame1().replace_menu()
+                app.getFrame1().tkraise()
         else:
-            curUser = pomUser
-            self.curUsername = self.usernameentry.get()
-
-            app.getFrame1().replace_menu()
-            app.getFrame1().tkraise()
+            app.getStartPage().tkraise()
 
     def getCurusername(self):
         return self.curUsername

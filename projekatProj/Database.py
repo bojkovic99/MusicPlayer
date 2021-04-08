@@ -2,12 +2,14 @@ import pymongo
 from io import BytesIO
 import numpy as np
 from scipy.io.wavfile import read
+import gridfs
 
 client = pymongo.MongoClient()
 
 mydb = client["userdb"]
 mycol = mydb["users"]
 mycol2 = mydb["facerec"]
+fs = gridfs.GridFS(mydb)
 
 
 class User:
@@ -90,6 +92,22 @@ def getAllSongs(username):
             return None
         else:
             return res["songs"]
+
+
+def getAllUsernames():
+    res = mycol.find({})
+    if res is None:
+        return None
+
+    else:
+        usernames = []
+        for r in res:
+            print(r["username"])
+            usernames.append(r["username"])
+
+
+        return usernames
+
 
 # mycol2.insert_one(t.__dict__)
 # mycol2.update_one({"_id":1},{"$push":{"niz":5}})

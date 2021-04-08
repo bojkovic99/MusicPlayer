@@ -7,14 +7,24 @@ pathFaceRecFile = 'C:/Users/Korisnik/Desktop/faks/face_recognition_images'
 
 class FaceRecog:
     def __init__(self):
+        a = 1
+        res = getAllUsernames()
+        self.known_face_encondings = []
+        self.known_face_names = []
+        if res is None:
+            return
 
-        bruno_image = fr.load_image_file(f"{pathFaceRecFile}/valz2.jpeg")
-        bruno_face_encoding = fr.face_encodings(bruno_image)[0]
+        for username in res:
+            image = fr.load_image_file(f"{pathFaceRecFile}/{username}.jpg")
+            image_encoding = fr.face_encodings(image)[0]
 
-        bruno_image2 = fr.load_image_file(f"{pathFaceRecFile}/andjela.jpg")
-        andjela_face_encoding = fr.face_encodings(bruno_image2)[0]
-        self.known_face_encondings = [andjela_face_encoding, bruno_face_encoding]
-        self.known_face_names = ["Andjela", "Valz"]
+            self.known_face_encondings.append(image_encoding)
+            self.known_face_names.append(username)
+
+
+
+
+
 
     def regRun(self, name):
         self.video_capture = cv2.VideoCapture(0)
@@ -24,7 +34,7 @@ class FaceRecog:
             cv2.imshow('Webcam_facerecognition', frame)
             img_counter = 0
             if cv2.waitKey(1) & 0xFF == ord('q'):
-                img_name = "{}.png".format(name)
+                img_name = "{}.jpg".format(name)
                 cv2.imwrite(f"{pathFaceRecFile}\{img_name}", frame)
                 print("{} written!".format(img_name))
                 img_counter += 1
@@ -35,8 +45,9 @@ class FaceRecog:
         cv2.destroyAllWindows()
 
     def run(self):
-
+        self.matchedFace = False
         self.video_capture = cv2.VideoCapture(0)
+        self.matchedUsername = ""
         while True:
             ret, frame = self.video_capture.read()
 
@@ -57,6 +68,10 @@ class FaceRecog:
 
                 if matches[best_match_index]:
                     name = self.known_face_names[best_match_index]
+                    self.matchedFace = True
+                    self.matchedUsername = name
+
+
 
                 cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
 
@@ -67,7 +82,17 @@ class FaceRecog:
             cv2.imshow('Webcam_facerecognition', frame)
             img_counter = 0
             if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
+
+                if self.matchedFace is True:
+                    self.video_capture.release()
+                    cv2.destroyAllWindows()
+                    return self.matchedUsername
+                else :
+                    self.video_capture.release()
+                    cv2.destroyAllWindows()
+                    return ""
+
+
 
         self.video_capture.release()
         cv2.destroyAllWindows()
