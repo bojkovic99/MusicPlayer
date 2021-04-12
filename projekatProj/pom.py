@@ -122,29 +122,26 @@ class MusicPlayerApp:
 
     def __init__(self):
         self.root = self.root1
+        container = Frame(self.root, width=250, height=150)
+        # container.pack(side="top", fill="both", expand=True)
+        # container.grid_rowconfigure(0, weight=1)
+        # container.grid_columnconfigure(0, weight=1)
+        # container.grid_propagate(False)
+
         self.root.title('MusicPlayer')
-        self.root.geometry('500x300')
-        self.root.resizable(0, 0)
+        self.root.geometry("500x300")
+        self.root.resizable(False, False)
         self.root.configure(bg='#f2f0ed')
 
+        pygame.init()
         self.frames = {}
 
         for F in (StartPage, Page1, Page2, RegisterPage, LoginPage):
-            frame = F(self.root, self)
+            frame = F(self.root, self, container)
+
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
 
-        # self.show_frame(Page1)
-        # Menu
-        #  myMenu = Menu(root)
-        # root.config(menu=myMenu)
-
-        # addSong = Menu(myMenu)
-        # shSongs = Menu(myMenu)
-        # myMenu.add_cascade(label="Add Song", menu=addSong)
-        # addSong.add_command(label="Add one song", command=addSongFun)
-        # myMenu.add_cascade(label="My Songs", menu=shSongs)
-        # shSongs.add_command(label="Show My Songs", command=showMySongs)
         pygame.mixer.init()
         self.frames[StartPage].tkraise()
 
@@ -178,7 +175,7 @@ class MusicPlayerApp:
 
 
 class Page1(Frame):
-    def __init__(self, parent, root):
+    def __init__(self, parent, root, container):
         Frame.__init__(self, parent)
 
         # Images
@@ -236,7 +233,7 @@ class Page1(Frame):
 
 class Page2(Frame):
 
-    def __init__(self, parent, root):
+    def __init__(self, parent, root, container):
         Frame.__init__(self, parent)
         # F2 SongList
         self.songList = Listbox(self, bg='#492a57', fg="white", width=80, height=12, selectforeground="white",
@@ -270,14 +267,28 @@ class Page2(Frame):
 
 
 class StartPage(Frame):
-    def __init__(self, parent, root):
+    def __init__(self, parent, root, container):
         Frame.__init__(self, parent)
-        self.btn1Img = ImageTk.PhotoImage(Image.open('images/Register-Now2.png').resize((200, 150)))
-        self.btn2Img = ImageTk.PhotoImage(Image.open('images/li2.png').resize((200, 200)))
-        self.btn1 = Button(self, image=self.btn1Img, bg='#f2f0ed', borderwidth=0, command=self.registerFun)
-        self.btn2 = Button(self, image=self.btn2Img, bg='#f2f0ed', borderwidth=0, command=self.loginFun)
-        self.btn2.pack(side="left", padx=25)
-        self.btn1.pack(side="left", padx=25)
+        self.grid_propagate(False)
+
+        self.configure(bg="#0a3f6b")
+
+        # bg image
+        self.pozadina = ImageTk.PhotoImage(Image.open('images/StartPageBg.jpeg').resize((500, 240)))
+        labela = Label(self, image=self.pozadina, bg="#0a3f6b")
+        labela.grid(row=0, column=0, columnspan=2, padx=0, pady=0)
+
+        # btn for LOGIN
+        self.btn1Img = ImageTk.PhotoImage(Image.open('images/LoginButton.png').resize((200, 60)))
+        self.btn1 = Button(self, image=self.btn1Img, bg='#0a3f6b', borderwidth=0, command=self.loginFun,
+                           activebackground="#0a3f6b")
+        self.btn1.grid(row=1, column=0, padx=25, pady=10)
+
+        # btn for REGISTER
+        self.btn2Img = ImageTk.PhotoImage(Image.open('images/RegisterButton.png').resize((200, 60)))
+        self.btn2 = Button(self, image=self.btn2Img, bg='#0a3f6b', borderwidth=0, command=self.registerFun,
+                           activebackground="#0a3f6b")
+        self.btn2.grid(row=1, column=1, padx=25, pady=10)
 
     def registerFun(self):
         app.getRegisterPage().tkraise()
@@ -288,17 +299,23 @@ class StartPage(Frame):
 
 
 class RegisterPage(Frame):
-    def __init__(self, parent, root):
+    def __init__(self, parent, root, container):
         Frame.__init__(self, parent)
+        self.configure(bg="#103748")
 
-        self.emptyL = Label(self, text="     ")
-        self.emptyL.grid(row=0, column=0)
-        self.name = Label(self, text="Name      ")
-        self.surname = Label(self, text="Surname ")
-        self.username = Label(self, text="Username")
-        self.name.grid(row=1, column=0, padx=20)
-        self.surname.grid(row=2, column=0, padx=20)
-        self.username.grid(row=3, column=0, padx=20)
+        # bg image
+        self.pozadina = ImageTk.PhotoImage(Image.open('images/regImg3.png').resize((200, 350)))
+        labela = Label(self, image=self.pozadina, bg="#103748")
+        labela.grid(row=0, column=0, padx=0, pady=0, rowspan=8)
+
+        self.emptyL = Label(self, text="     ", bg="#103748")
+        self.emptyL.grid(row=0, column=1)
+        self.name = Label(self, text="Name      ", bg='#103748', fg="white")
+        self.surname = Label(self, text="Surname ", bg='#103748', fg="white")
+        self.username = Label(self, text="Username", bg='#103748', fg="white")
+        self.name.grid(row=1, column=1, padx=20)
+        self.surname.grid(row=2, column=1, padx=20)
+        self.username.grid(row=3, column=1, padx=20)
         self.nameVar = StringVar
         self.surnameVar = StringVar
         self.usernameVar = StringVar
@@ -306,29 +323,29 @@ class RegisterPage(Frame):
         self.nameentry = Entry(self, textvariable=self.nameVar)
         self.surnameentry = Entry(self, textvariable=self.surnameVar)
         self.usernameentry = Entry(self, textvariable=self.usernameVar)
-        self.nameentry.grid(row=1, column=1)
-        self.surnameentry.grid(row=2, column=1)
-        self.usernameentry.grid(row=3, column=1)
-        self.empty = Label(self, text="     ")
-        self.empty.grid(row=4, column=0)
+        self.nameentry.grid(row=1, column=2)
+        self.surnameentry.grid(row=2, column=2)
+        self.usernameentry.grid(row=3, column=2)
+        self.empty = Label(self, text="     ", bg='#103748')
+        self.empty.grid(row=4, column=1)
 
-        self.btn = Button(self, text="Submit", bg='#f2f0ed', fg="black", command=self.submitFun, state="disabled")
-        self.btn.grid(row=5, column=0)
-        self.checkUsernameBtn = Button(self, text="C", bg='#f2f0ed', fg="black", command=self.checkUsername)
-        self.checkUsernameBtn.grid(row=3, column=2)
+        self.btn = Button(self, text="Submit", bg='#103748', fg="black", command=self.submitFun, state="disabled")
+        self.btn.grid(row=5, column=1)
+        self.checkUsernameBtn = Button(self, text="C", bg='#103748', fg="black", command=self.checkUsername)
+        self.checkUsernameBtn.grid(row=3, column=3)
 
-        self.btnWebCam = Button(self, text="Web cam", bg='#f2f0ed', fg="black", command=self.openWebCam,
+        self.btnWebCam = Button(self, text="Web cam", bg='#103748', fg="black", command=self.openWebCam,
                                 state="disabled")
-        self.btnWebCam.grid(row=5, column=1)
+        self.btnWebCam.grid(row=5, column=2)
 
-        self.empty = Label(self, text="     ")
-        self.empty.grid(row=6, column=0)
-        self.emptyInput = Label(self, text="Please, first enter your username!")
-        self.emptyInput.grid(row=7, column=1)
+        self.empty = Label(self, text="     ", bg='#103748')
+        self.empty.grid(row=6, column=1)
+        self.emptyInput = Label(self, text="Please, first enter your username!", bg='#103748', fg="white")
+        self.emptyInput.grid(row=7, column=2)
 
     def submitFun(self):
         if (self.nameentry.get() == "" or self.surnameentry.get() == "" or self.usernameentry.get() == ""):
-            self.emptyInput.configure(text="Please, fill the all fields!")
+            self.emptyInput.configure(text="Please, fill the all fields!", fg="white")
             return
 
         u = User(self.nameentry.get(), self.surnameentry.get(), self.usernameentry.get())
@@ -338,7 +355,7 @@ class RegisterPage(Frame):
             app.getLoginPage().curUsername = self.usernameentry.get()
             app.getFrame1().tkraise()
         else:
-            self.emptyInput.configure(text="Username already exists!")
+            self.emptyInput.configure(text="Username already exists!", fg="white")
             return
 
     def checkUsername(self):
@@ -350,36 +367,57 @@ class RegisterPage(Frame):
             self.usernameentry.configure(state="disable")
         else:
             # CheckUsernameBtn postaje crven
-            self.emptyInput.configure(text="Username already exists!")
+            self.emptyInput.configure(text="Username already exists!", fg="white")
 
     def openWebCam(self):
         self.emptyInput.configure(text="Please, press 'q' if you want to take a picture!")
         app.getLoginPage().faceR.regRun(self.usernameentry.get())
-        self.emptyInput.configure(text="Your picture is taken and saved!")
+        self.emptyInput.configure(text="Your picture is taken and saved!", fg="white")
         self.btn.configure(state="normal")
 
 
 class LoginPage(Frame):
-    def __init__(self, parent, root):
+    def __init__(self, parent, root, container):
         Frame.__init__(self, parent)
 
-        self.curUsername = ""
-        self.emptyL = Label(self, text="     ")
-        self.emptyL.grid(row=0, column=0)
+        self.configure(bg="#24244a")
 
-        self.btnWebCam = Button(self, text="Web cam", bg='#f2f0ed', fg="black", command=self.setLabel)
-        self.btnWebCam.grid(row=1, column=1)
+        # bg image
+        self.pozadina = ImageTk.PhotoImage(Image.open('images/faceRecognition.jpg').resize((300, 350)))
+        labela = Label(self, image=self.pozadina, bg="#24244a")
+        labela.grid(row=0, column=0, padx=0, pady=0, rowspan=3)
 
-        self.eL = Label(self, text="     ")
-        self.eL.grid(row=2, column=0)
+        # controlFrame.grid(row=0, column=1, pady=50)
+        # controlFrame.configure(bg="#24244a")
+        # self.curUsername = ""
+        # self.emptyL = Label(self, text="     ")
+        # self.emptyL.grid(row=0, column=0)
 
-        self.emptyLabel = Label(self, text=" ... ")
-        self.emptyLabel.grid(row=3, column=1)
+        # web cam button
+
+        self.camImg = ImageTk.PhotoImage(Image.open('images/cam3.png').resize((90, 65)))
+        # self.btn2 = Button(self, image=self.btn2Img, bg='#0a3f6b', borderwidth=0, command=self.registerFun,
+        #                  activebackground="#0a3f6b")
+        self.btnWebCam = Button(self, image=self.camImg, bg='#24244a', fg="white", command=self.setLabel,
+                                activebackground="#24244a", borderwidth=0)
+        self.btnWebCam.grid(row=0, column=1, pady=0)
+
+        self.eL = Label(self, bg="#24244a", text="     ")
+        self.eL.grid(row=2, column=1)
+
+        self.infoImg = ImageTk.PhotoImage(Image.open('images/infoPNG.png').resize((25, 25)))
+
+        self.emptyLabel = Label(self,
+                                text=" Please, click on camera icon to\n open your web camera. Press\n 'q' when you want to log in!",
+                                bg="#24244a", fg="white")
+        self.emptyLabel.grid(row=2, column=1)
+        self.emptyLabel["compound"] = LEFT
+        self.emptyLabel["image"] = self.infoImg
 
         self.faceR = FaceRecog()
 
     def setLabel(self):
-        self.emptyLabel.configure(text="Please, press 'q' if you want to log in!")
+        self.emptyLabel.configure(text="Please")
         self.openWebCam()
 
     def openWebCam(self):
