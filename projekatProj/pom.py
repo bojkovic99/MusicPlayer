@@ -326,22 +326,34 @@ class RegisterPage(Frame):
         self.nameentry.grid(row=1, column=2)
         self.surnameentry.grid(row=2, column=2)
         self.usernameentry.grid(row=3, column=2)
-        self.empty = Label(self, text="     ", bg='#103748')
-        self.empty.grid(row=4, column=1)
+        # self.empty = Label(self, text="     ", bg='#103748')
+        # self.empty.grid(row=4, column=1)
 
-        self.btn = Button(self, text="Submit", bg='#103748', fg="black", command=self.submitFun, state="disabled")
+        # submit button
+        self.submitImg = ImageTk.PhotoImage(Image.open('images/submitPNG.png').resize((80, 60)))
+        self.btn = Button(self, image=self.submitImg, bg='#103748', borderwidth=0, activebackground="#103748",
+                          command=self.submitFun, state="disabled")
         self.btn.grid(row=5, column=1)
-        self.checkUsernameBtn = Button(self, text="C", bg='#103748', fg="black", command=self.checkUsername)
+
+        # check button
+        self.checkImg = ImageTk.PhotoImage(Image.open('images/checkImg.png').resize((30, 30)))
+        self.checkOkImg = ImageTk.PhotoImage(Image.open('images/checkOK.png').resize((30, 30)))
+        self.checkXImg = ImageTk.PhotoImage(Image.open('images/redXbutton.png').resize((30, 30)))
+        self.checkUsernameBtn = Button(self, image=self.checkImg, bg='#103748', borderwidth=0,
+                                       activebackground="#103748", command=self.checkUsername)
         self.checkUsernameBtn.grid(row=3, column=3)
 
-        self.btnWebCam = Button(self, text="Web cam", bg='#103748', fg="black", command=self.openWebCam,
+        # web cam button
+        self.camImg = ImageTk.PhotoImage(Image.open('images/cam3.png').resize((80, 60)))
+        self.btnWebCam = Button(self, image=self.camImg, bg='#103748', borderwidth=0, activebackground="#103748",
+                                command=self.openWebCam,
                                 state="disabled")
         self.btnWebCam.grid(row=5, column=2)
 
-        self.empty = Label(self, text="     ", bg='#103748')
-        self.empty.grid(row=6, column=1)
+        # self.empty = Label(self, text="     ", bg='#103748')
+        # self.empty.grid(row=6, column=1)
         self.emptyInput = Label(self, text="Please, first enter your username!", bg='#103748', fg="white")
-        self.emptyInput.grid(row=7, column=2)
+        self.emptyInput.grid(row=6, column=1, columnspan=2)
 
     def submitFun(self):
         if (self.nameentry.get() == "" or self.surnameentry.get() == "" or self.usernameentry.get() == ""):
@@ -365,9 +377,19 @@ class RegisterPage(Frame):
             self.btnWebCam.configure(state="normal")
             self.emptyInput.configure(text="")
             self.usernameentry.configure(state="disable")
+            self.infoImg = ImageTk.PhotoImage(Image.open('images/infoPNG.png').resize((25, 25)))
+
+            self.emptyLabel = Label(self,
+                                    text=" Please, click on camera icon to open  your web \n camera. Press 'q' when  you want to take picture, \n and after that press submit for registration!",
+                                    bg="#103748", fg="white")
+            self.emptyLabel.grid(row=6, column=1, columnspan=3)
+            self.emptyLabel["compound"] = LEFT
+            self.emptyLabel["image"] = self.infoImg
+            self.checkUsernameBtn.configure(image=self.checkOkImg)
         else:
             # CheckUsernameBtn postaje crven
             self.emptyInput.configure(text="Username already exists!", fg="white")
+            self.checkUsernameBtn.configure(image=self.checkXImg)
 
     def openWebCam(self):
         self.emptyInput.configure(text="Please, press 'q' if you want to take a picture!")
