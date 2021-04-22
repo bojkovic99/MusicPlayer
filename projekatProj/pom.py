@@ -123,10 +123,6 @@ class MusicPlayerApp:
     def __init__(self):
         self.root = self.root1
         container = Frame(self.root, width=250, height=150)
-        # container.pack(side="top", fill="both", expand=True)
-        # container.grid_rowconfigure(0, weight=1)
-        # container.grid_columnconfigure(0, weight=1)
-        # container.grid_propagate(False)
 
         self.root.title('MusicPlayer')
         self.root.geometry("500x300")

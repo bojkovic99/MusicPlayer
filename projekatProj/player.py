@@ -4,6 +4,7 @@ from tkinter import *
 import os
 
 
+
 root = tk.Tk()
 
 embed = tk.Frame(root, width = 500, height = 500) #creates embed frame for pygame window
