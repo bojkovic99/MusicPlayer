@@ -375,8 +375,11 @@ class RegisterPage(Frame):
             self.usernameentry.configure(state="disable")
             self.infoImg = ImageTk.PhotoImage(Image.open('images/infoPNG.png').resize((25, 25)))
 
+            # self.emptyLabel = Label(self,
+            #                         text=" Please, click on camera icon to open  your web \n camera. Press 'q' when  you want to take picture, \n and after that press submit for registration!",
+            #                         bg="#103748", fg="white")
             self.emptyLabel = Label(self,
-                                    text=" Please, click on camera icon to open  your web \n camera. Press 'q' when  you want to take picture, \n and after that press submit for registration!",
+                                    text=" Please, click on camera icon to open  your web \n camera. Press 'q' when  you want to take picture!",
                                     bg="#103748", fg="white")
             self.emptyLabel.grid(row=6, column=1, columnspan=3)
             self.emptyLabel["compound"] = LEFT
@@ -388,9 +391,9 @@ class RegisterPage(Frame):
             self.checkUsernameBtn.configure(image=self.checkXImg)
 
     def openWebCam(self):
-        self.emptyInput.configure(text="Please, press 'q' if you want to take a picture!")
+        # self.emptyLabel.configure(text="Please, press 'q' if you want to take a picture!")
         app.getLoginPage().faceR.regRun(self.usernameentry.get())
-        self.emptyInput.configure(text="Your picture is taken and saved!", fg="white")
+        self.emptyLabel.configure(text="Your picture is taken and saved! \nPress submit for registration.", fg="white")
         self.btn.configure(state="normal")
 
 
@@ -426,7 +429,7 @@ class LoginPage(Frame):
         self.infoImg = ImageTk.PhotoImage(Image.open('images/infoPNG.png').resize((25, 25)))
 
         self.emptyLabel = Label(self,
-                                text=" Please, click on camera icon to\n open your web camera. Press\n 'q' when you want to log in!",
+                                text=" Please, click on camera icon to\n open your web camera.",
                                 bg="#24244a", fg="white")
         self.emptyLabel.grid(row=2, column=1)
         self.emptyLabel["compound"] = LEFT
@@ -435,10 +438,11 @@ class LoginPage(Frame):
         self.faceR = FaceRecog()
 
     def setLabel(self):
-        self.emptyLabel.configure(text="Please")
+        self.emptyLabel.configure(text=" Press 'q' when you \n want to log in!")
         self.openWebCam()
 
     def openWebCam(self):
+        # Pozivom run fje otvara se kamerica
         loginUsername = app.getLoginPage().faceR.run()
         if loginUsername != "":
             foundUser = loginDb(loginUsername)

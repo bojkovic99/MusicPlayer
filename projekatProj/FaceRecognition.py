@@ -16,6 +16,7 @@ class FaceRecog:
 
         for username in res:
             image = fr.load_image_file(f"{pathFaceRecFile}/{username}.jpg")
+            # za datu sliku vraća koordinate prvog lica koje je prepoznao
             image_encoding = fr.face_encodings(image)[0]
 
             self.known_face_encondings.append(image_encoding)
@@ -44,6 +45,7 @@ class FaceRecog:
         self.video_capture.release()
         cv2.destroyAllWindows()
 
+    # run je obična funkcija! Ne zove se samo, mi smo tako nazvale
     def run(self):
         self.matchedFace = False
         self.video_capture = cv2.VideoCapture(0)
@@ -58,14 +60,18 @@ class FaceRecog:
 
             for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
 
+                # Za sva lica iz aplikacije i lica sa kamere vraća true ili false da li je to ta osoba sa datom tolerancijom
                 matches = fr.compare_faces(self.known_face_encondings, face_encoding, tolerance=0.5)
 
                 name = "Unknown"
 
+                # Vraca distance za sva lica iz aplikacije i lica sa kamere
                 face_distances = fr.face_distance(self.known_face_encondings, face_encoding)
 
+                # Vrati najbolju distancu
                 best_match_index = np.argmin(face_distances)
 
+                # Proveri da li je lica sa najbolje distance zapravo i lice sa kamere
                 if matches[best_match_index]:
                     name = self.known_face_names[best_match_index]
                     self.matchedFace = True
