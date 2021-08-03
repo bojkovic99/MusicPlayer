@@ -3,6 +3,7 @@ from PIL import ImageTk, Image
 import pygame
 from tkinter import filedialog
 from FaceRecognition import *
+from Database import *
 
 curUser = User("", "", "")
 
@@ -27,6 +28,22 @@ def removeSongFun():
         deleteSongDB(song, app.getLoginPage().getCurusername())
 
     app.getFrame2().tkraise()
+
+def logOut():
+    app.getLoginPage().curUsername = ""
+    curUser = User("", "", "")
+    # app.getFrame1().menubar.delete(1)
+    # app.getFrame1().menubar.delete(2)
+    # app.getFrame1().menubar.delete(3)
+    # app.getFrame1().menubar.delete(4)
+    # app.getFrame1().menubar.delete(5)
+
+
+    app.getStartPage().tkraise()
+    emptyEmptyMenu = Menu(app.root)
+    app.root.config(menu=emptyEmptyMenu)
+    # app.getStartPage().master.menu = app.getFrame1().menubar
+
 
 
 def addSongFun():
@@ -119,7 +136,6 @@ def playNextSong():
 
 class MusicPlayerApp:
     root1 = Tk()
-
     def __init__(self):
         self.root = self.root1
         container = Frame(self.root, width=250, height=150)
@@ -207,12 +223,17 @@ class Page1(Frame):
 
     def replace_menu(self):
         self.menubar = app.menubar
+        #self.menubar = app.emptyMenu
         addSong = Menu(self.menubar)
         shSongs = Menu(self.menubar)
         self.removeSongs = Menu(self.menubar)
+        userMenu = Menu(self.menubar)
+
+
+
         self.menubar.add_cascade(label="Add Song", menu=addSong)
         addSong.add_command(label="Add one song", command=addSongFun)
-
+        self.menubar.add_separator()
         self.menubar.add_cascade(label="Remove Song", menu=self.removeSongs)
         self.removeSongs.add_command(label="Remove One Song", command=removeSongFun)
 
@@ -220,6 +241,20 @@ class Page1(Frame):
 
         self.menubar.add_cascade(label="My Songs", menu=shSongs)
         shSongs.add_command(label="Show My Songs", command=showMySongs)
+
+        blankmenu = Menu(self.menubar, tearoff=0)
+        self.menubar.add_cascade(label=" ".ljust(60), menu=blankmenu)
+
+        self.master.userIcon = ImageTk.PhotoImage(Image.open(r'images/blackPauzica.png').resize((20,20)))
+        # self.labela3 = Label(self, text="AaAaaaa")
+        # self.labela3.place(relx=1.0,
+        #        rely=0.0,
+        #        anchor='ne')
+        self.menubar.add_cascade(label="Profile",  menu=userMenu)
+        self.userNameLabel = Label(self, text=app.getLoginPage().getCurusername(), fg="#5e3670",font=('bold'))
+        userMenu.add_command(label="* "+app.getLoginPage().getCurusername()+" *")
+        userMenu.add_command(label="  Log out", command=logOut)
+
 
         self.master.menu = self.menubar
 
@@ -353,7 +388,7 @@ class RegisterPage(Frame):
 
     def submitFun(self):
         if (self.nameentry.get() == "" or self.surnameentry.get() == "" or self.usernameentry.get() == ""):
-            self.emptyInput.configure(text="Please, fill the all fields!", fg="white")
+            self.emptyLabel.configure(text="Please, fill the all fields!", fg="white")
             return
 
         u = User(self.nameentry.get(), self.surnameentry.get(), self.usernameentry.get())
@@ -363,12 +398,18 @@ class RegisterPage(Frame):
             app.getLoginPage().curUsername = self.usernameentry.get()
             app.getFrame1().tkraise()
         else:
-            self.emptyInput.configure(text="Username already exists!", fg="white")
+            self.emptyLabel.configure(text="Username already exists!", fg="white")
             return
 
     def checkUsername(self):
+
+        if self.usernameentry.get() == "":
+            self.emptyInput.configure(text="Please, first enter your username!", fg="white")
+            self.checkUsernameBtn.configure(image=self.checkXImg)
+            return
+
         correct = findUser(self.usernameentry.get())
-        if correct == 1 and self.usernameentry.get() != "":
+        if correct == 1 :
             # menja se izgled CheckUsernameBtn
             self.btnWebCam.configure(state="normal")
             self.emptyInput.configure(text="")

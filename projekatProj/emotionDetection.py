@@ -25,8 +25,8 @@ def detect_and_predict_mask(frame, faceNet, maskNet, threshold):
     # grab the dimensions of the frame and then construct a blob
     # from it
     global detections
-    (h, w) = frame.shape[:2]
-    blob = cv2.dnn.blobFromImage(frame, 1.0, (300, 300), (104.0, 177.0, 123.0))
+    (h, w) = frame.shape[:2] # uzima samo prve dve jer su to visina i sirina
+    blob = cv2.dnn.blobFromImage(frame, 1.0, (300, 300), (104.0, 177.0, 123.0))  # ovakve vrednosti su standard za dnn
 
     # pass the blob through the network and obtain the face detections
     faceNet.setInput(blob)
@@ -40,13 +40,14 @@ def detect_and_predict_mask(frame, faceNet, maskNet, threshold):
     # loop over the detections
     for i in range(0, detections.shape[2]):
         # extract the confidence (i.e., probability) associated with
-        confidence = detections[0, 0, i, 2]
+        confidence = detections[0, 0, i, 2] #  gives confidence of ith box prediction
 
         # filter out weak detections by ensuring the confidence is
         # greater than the minimum confidence
         if confidence > threshold:
             # compute the (x, y)-coordinates of the bounding box for
             # the object
+            # detections[0, 0, i, 3:7] - gives coordinates bounding boxes for resized small image
             box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
             (startX, startY, endX, endY) = box.astype("int")
 
@@ -75,12 +76,8 @@ def detect_and_predict_mask(frame, faceNet, maskNet, threshold):
 # SETTINGS
 MASK_MODEL_PATH = "C:/Users/Korisnik/Desktop/faks/model/emotion_model.h5"
 FACE_MODEL_PATH = "C:/Users/Korisnik/Desktop/faks/face_detector"
-# SOUND_PATH = os.getcwd() + "\\sounds\\alarm.wav"
 THRESHOLD = 0.5
 
-# Load Sounds
-# mixer.init()
-# sound = mixer.Sound(SOUND_PATH)
 
 # load our serialized face detector model from disk
 print("[INFO] loading face detector model...")
@@ -135,7 +132,7 @@ while True:
 
     # show the output frame
     frame = cv2.resize(original_frame, (860, 490))
-    cv2.imshow("Facial Expression by Oh Yicong", frame)
+    cv2.imshow("Facial Expression", frame)
     key = cv2.waitKey(1) & 0xFF
 
     # if the `q` key was pressed, break from the loop
