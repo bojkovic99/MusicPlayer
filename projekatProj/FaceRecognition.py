@@ -23,10 +23,6 @@ class FaceRecog:
             self.known_face_names.append(username)
 
 
-
-
-
-
     def regRun(self, name):
         self.video_capture = cv2.VideoCapture(0)
 

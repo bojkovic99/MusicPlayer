@@ -135,7 +135,7 @@ while (True):
     cv2.putText(gray, "S - Sad", (w - 110, 55), cv2.FONT_HERSHEY_COMPLEX, 0.5, (255, 255, 255), 1)
     cv2.putText(gray, "A - Angry", (w - 110, 75), cv2.FONT_HERSHEY_COMPLEX, 0.5, (255, 255, 255), 1)
     cv2.putText(gray, "Q - Quit", (w - 110,  95), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 255), 1)
-    cv2.imshow('frame', gray)
+    cv2.imshow('Create Data Set', gray)
 
     # wait for key press
     key = cv2.waitKey(1)

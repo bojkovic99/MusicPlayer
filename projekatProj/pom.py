@@ -2,13 +2,17 @@ from tkinter import *
 from PIL import ImageTk, Image
 import pygame
 from tkinter import filedialog
+
+from click import command
+
 from FaceRecognition import *
 from Database import *
+from emotionDetection import *
 
 curUser = User("", "", "")
 
 pathSongFile = 'C:/Users/Korisnik/Desktop/faks/music'
-
+FIRST_MENU = 1
 
 def contain(item):
     iscontain = item in app.getFrame2().getSL().get(0, "end")
@@ -22,6 +26,8 @@ def showMySongs():
 
 
 def removeSongFun():
+    pygame.mixer.music.stop()
+    app.getFrame1().songName = ""
     song = app.getFrame2().getSL().get(ANCHOR)
     app.getFrame2().getSL().delete(ANCHOR)
     if song is not None:
@@ -30,6 +36,8 @@ def removeSongFun():
     app.getFrame2().tkraise()
 
 def logOut():
+    pygame.mixer.music.stop()
+    app.getFrame1().songName = "..."
     app.getLoginPage().curUsername = ""
     curUser = User("", "", "")
     # app.getFrame1().menubar.delete(1)
@@ -44,7 +52,9 @@ def logOut():
     app.root.config(menu=emptyEmptyMenu)
     # app.getStartPage().master.menu = app.getFrame1().menubar
 
-
+def emotionDetectionFun():
+    print("emotionDetectionFun")
+    app.getFaceEmotionPage().tkraise()
 
 def addSongFun():
     app.getFrame2().addSongsFromDB()
@@ -62,6 +72,17 @@ def addSongFun():
     app.getFrame2().replace_menu()
     app.getFrame2().tkraise()
 
+
+def playSongEmotion():
+    song = app.getFrame2().getSL().get(0)
+    songCut = song
+    song = f'{pathSongFile}/{song}.mp3'
+    pygame.mixer.music.load(song)
+    pygame.mixer.music.play(loops=0)
+    app.getFrame1().songName.configure(text=f'{songCut}')
+    app.getFrame1().playBtn.configure(image=app.getFrame1().pauseImg, command=pauseSongF1)
+    app.getFrame1().removeSongs.entryconfig("Remove One Song", state="disabled")
+    app.getFrame1().tkraise()
 
 def playSongF2():
     selection = app.getFrame2().getSL().curselection()
@@ -148,7 +169,7 @@ class MusicPlayerApp:
         pygame.init()
         self.frames = {}
 
-        for F in (StartPage, Page1, Page2, RegisterPage, LoginPage):
+        for F in (StartPage, Page1, Page2, RegisterPage, LoginPage, FaceEmotionPage):
             frame = F(self.root, self, container)
 
             self.frames[F] = frame
@@ -185,6 +206,9 @@ class MusicPlayerApp:
     def getLoginPage(self):
         return self.frames[LoginPage]
 
+    def getFaceEmotionPage(self):
+        return self.frames[FaceEmotionPage]
+
 
 class Page1(Frame):
     def __init__(self, parent, root, container):
@@ -199,6 +223,7 @@ class Page1(Frame):
         self.prevImg = ImageTk.PhotoImage(Image.open('images/prevBlack.png').resize((40, 40)))
         self.pauseImg = ImageTk.PhotoImage(Image.open('images/blackPauzica.png').resize((60, 60)))
         self.pozadina = ImageTk.PhotoImage(Image.open('images/slika.jpg').resize((450, 200)))
+        self.emotionImg = ImageTk.PhotoImage(Image.open('images/blackPauzica.png').resize((40, 40)))
 
         # bg image
 
@@ -215,49 +240,60 @@ class Page1(Frame):
         self.nextBtn = Button(self, image=self.nextImg, bg='#f2f0ed', borderwidth=0, command=playNextSong)
         self.playBtn = Button(self, image=self.playImg, bg='#f2f0ed', borderwidth=0, command=playSongF1)
 
+
         self.pauseBtn = Button(self, image=self.pauseImg, bg='#f2f0ed', borderwidth=0)
 
         self.prevBtn.grid(row=3, column=0, pady=5)
         self.playBtn.grid(row=3, column=1)
         self.nextBtn.grid(row=3, column=2)
 
+        self.fistMenu = 1
+
+
     def replace_menu(self):
-        self.menubar = app.menubar
-        #self.menubar = app.emptyMenu
-        addSong = Menu(self.menubar)
-        shSongs = Menu(self.menubar)
-        self.removeSongs = Menu(self.menubar)
-        userMenu = Menu(self.menubar)
+        if(self.fistMenu == 1):
+            self.fistMenu = 0
+            self.menubar = app.menubar
+            #self.menubar = app.emptyMenu
+            addSong = Menu(self.menubar)
+            shSongs = Menu(self.menubar)
+            smartPlayer = Menu(self.menubar)
+            self.removeSongs = Menu(self.menubar)
+            userMenu = Menu(self.menubar)
 
 
 
-        self.menubar.add_cascade(label="Add Song", menu=addSong)
-        addSong.add_command(label="Add one song", command=addSongFun)
-        self.menubar.add_separator()
-        self.menubar.add_cascade(label="Remove Song", menu=self.removeSongs)
-        self.removeSongs.add_command(label="Remove One Song", command=removeSongFun)
 
-        self.removeSongs.entryconfig("Remove One Song", state="disabled")
+            self.menubar.add_cascade(label="Add Song", menu=addSong)
+            addSong.add_command(label="Add one song", command=addSongFun)
+            self.menubar.add_cascade(label="Remove Song", menu=self.removeSongs)
+            self.removeSongs.add_command(label="Remove One Song", command=removeSongFun)
 
-        self.menubar.add_cascade(label="My Songs", menu=shSongs)
-        shSongs.add_command(label="Show My Songs", command=showMySongs)
+            self.removeSongs.entryconfig("Remove One Song", state="disabled")
 
-        blankmenu = Menu(self.menubar, tearoff=0)
-        self.menubar.add_cascade(label=" ".ljust(60), menu=blankmenu)
+            self.menubar.add_cascade(label="My Songs", menu=shSongs)
+            shSongs.add_command(label="Show My Songs", command=showMySongs)
 
-        self.master.userIcon = ImageTk.PhotoImage(Image.open(r'images/blackPauzica.png').resize((20,20)))
-        # self.labela3 = Label(self, text="AaAaaaa")
-        # self.labela3.place(relx=1.0,
-        #        rely=0.0,
-        #        anchor='ne')
-        self.menubar.add_cascade(label="Profile",  menu=userMenu)
-        self.userNameLabel = Label(self, text=app.getLoginPage().getCurusername(), fg="#5e3670",font=('bold'))
-        userMenu.add_command(label="* "+app.getLoginPage().getCurusername()+" *")
-        userMenu.add_command(label="  Log out", command=logOut)
+            self.menubar.add_cascade(label="Smart Player", menu=smartPlayer)
+            smartPlayer.add_command(label="Face Emotion", command=emotionDetectionFun)
+
+            blankmenu = Menu(self.menubar, tearoff=0)
+            self.menubar.add_cascade(label=" ".ljust(40), menu=blankmenu)
+
+            self.master.userIcon = ImageTk.PhotoImage(Image.open(r'images/blackPauzica.png').resize((20,20)))
+            # self.labela3 = Label(self, text="AaAaaaa")
+            # self.labela3.place(relx=1.0,
+            #        rely=0.0,
+            #        anchor='ne')
+            self.menubar.add_cascade(label="Profile",  menu=userMenu)
+            self.userNameLabel = Label(self, text=app.getLoginPage().getCurusername(), fg="#5e3670",font=('bold'))
+            userMenu.add_command(label="* "+app.getLoginPage().getCurusername()+" *")
+            userMenu.add_command(label="  Log out", command=logOut)
 
 
-        self.master.menu = self.menubar
+           # self.master.menu = self.menubar
 
+        app.root.config(menu=self.menubar)
     def getSName(self):
         return self.songName
 
@@ -281,6 +317,7 @@ class Page2(Frame):
         addSong = Menu(self.menubar)
         shSongs = Menu(self.menubar)
         removeSongs = Menu(self.menubar)
+        smartPlayer = Menu(self.menubar)
 
         app.getFrame1().removeSongs.entryconfig("Remove One Song", state="normal")
 
@@ -502,6 +539,39 @@ class LoginPage(Frame):
 
     def getCurusername(self):
         return self.curUsername
+
+class FaceEmotionPage(Frame):
+    def __init__(self, parent, root, container):
+        Frame.__init__(self, parent)
+
+        self.configure(bg="#325c86")
+        self.pozadina = ImageTk.PhotoImage(Image.open('images/emotionPageCrop.jpg').resize((300, 300)))
+        labela = Label(self, image=self.pozadina, bg="#325c86")
+        labela.grid(row=0, column=0, padx=0, pady=0, rowspan=3)
+
+        self.camImg = ImageTk.PhotoImage(Image.open('images/emDetectionIconWhite.png').resize((75, 70)))
+        # self.btn2 = Button(self, image=self.btn2Img, bg='#0a3f6b', borderwidth=0, command=self.registerFun,
+        #                  activebackground="#0a3f6b")
+        self.btnWebCam = Button(self, image=self.camImg, bg='#325c86', fg="white", command=self.faceDetBtn,
+                                activebackground="#325c86", borderwidth=0)
+        self.btnWebCam.grid(row=0, column=1, pady=0)
+
+        self.eL = Label(self, bg="#325c86", text="     ")
+        self.eL.grid(row=2, column=1)
+
+        self.infoImg = ImageTk.PhotoImage(Image.open('images/infoPNG.png').resize((25, 25)))
+
+        self.emptyLabel = Label(self,
+                                text=" Please, click on camera icon to\n open your web camera.",
+                                bg="#325c86", fg="white")
+        self.emptyLabel.grid(row=2, column=1)
+        self.emptyLabel["compound"] = LEFT
+        self.emptyLabel["image"] = self.infoImg
+
+    def faceDetBtn(self):
+        self.emotion = DetectionFun()
+        playSongEmotion()
+
 
 
 app = MusicPlayerApp()

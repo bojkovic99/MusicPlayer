@@ -90,55 +90,69 @@ print("[INFO] loading emotion detector model...")
 maskNet = load_model(MASK_MODEL_PATH)
 
 # initialize the video stream and allow the camera sensor to warm up
-print("[INFO] starting video stream...")
-vs = VideoStream(0).start()
-time.sleep(2.0)
+# print("[INFO] starting video stream...")
 
-labels = ["happy", "neutral", "sad"]
+
+labels = ["happy", "neutral", "sad", "angry"]
 
 # loop over the frames from the video stream
-while True:
-    # grab the frame from the threaded video stream and resize it
-    # to have a maximum width of 400 pixels
-    frame = vs.read()
-    frame = imutils.resize(frame, width=400)
-    original_frame = frame.copy()
-    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
 
-    # detect faces in the frame and determine if they are wearing a
-    # face mask or not
-    (locs, preds) = detect_and_predict_mask(frame, faceNet, maskNet, THRESHOLD)
 
-    # loop over the detected face locations and their corresponding
-    # locations
-    for (box, pred) in zip(locs, preds):
-        # unpack the bounding box and predictions
-        (startX, startY, endX, endY) = box
-        # include the probability in the label
-        label = str(labels[np.argmax(pred)])
-        # display the label and bounding box rectangle on the output
-        # frame
-        if label == "happy":
-            cv2.putText(original_frame, label, (startX, startY - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 200, 50), 2)
-            cv2.rectangle(original_frame, (startX, startY), (endX, endY), (0, 200, 50), 2)
-        elif label == "neutral":
-            cv2.putText(original_frame, label, (startX, startY - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (255, 255, 255),
-                        2)
-            cv2.rectangle(original_frame, (startX, startY), (endX, endY), (255, 255, 255), 2)
-        elif label == "sad":
-            cv2.putText(original_frame, label, (startX, startY - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 50, 200), 2)
-            cv2.rectangle(original_frame, (startX, startY), (endX, endY), (0, 50, 200), 2)
 
-    # show the output frame
-    frame = cv2.resize(original_frame, (860, 490))
-    cv2.imshow("Facial Expression", frame)
-    key = cv2.waitKey(1) & 0xFF
+def DetectionFun():
+    vs = VideoStream(0).start()
+    time.sleep(2.0)
+    while True:
+        # grab the frame from the threaded video stream and resize it
+        # to have a maximum width of 400 pixels
 
-    # if the `q` key was pressed, break from the loop
-    if key == ord("q"):
-        break
+        frame = vs.read()
+        frame = imutils.resize(frame, width=400)
+        original_frame = frame.copy()
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
 
-# do a bit of cleanup
-cv2.destroyAllWindows()
-vs.stop()
+        # detect faces in the frame and determine if they are wearing a
+        # face mask or not
+        (locs, preds) = detect_and_predict_mask(frame, faceNet, maskNet, THRESHOLD)
+
+        # loop over the detected face locations and their corresponding
+        # locations
+        for (box, pred) in zip(locs, preds):
+            # unpack the bounding box and predictions
+            (startX, startY, endX, endY) = box
+            # include the probability in the label
+            label = str(labels[np.argmax(pred)])
+            # display the label and bounding box rectangle on the output
+            # frame
+            if label == "happy":
+                cv2.putText(original_frame, label, (startX, startY - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 200, 50), 2)
+                cv2.rectangle(original_frame, (startX, startY), (endX, endY), (0, 200, 50), 2)
+            elif label == "neutral":
+                cv2.putText(original_frame, label, (startX, startY - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (255, 255, 255),
+                            2)
+                cv2.rectangle(original_frame, (startX, startY), (endX, endY), (255, 255, 255), 2)
+            elif label == "sad":
+                cv2.putText(original_frame, label, (startX, startY - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 50, 200), 2)
+                cv2.rectangle(original_frame, (startX, startY), (endX, endY), (0, 50, 200), 2)
+            elif label == "angry":
+                cv2.putText(original_frame, label, (startX, startY - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (125, 76, 119),
+                            2)
+                cv2.rectangle(original_frame, (startX, startY), (endX, endY), (125, 76, 119), 2)
+
+        # show the output frame
+        frame = cv2.resize(original_frame, (860, 490))
+        cv2.imshow("Facial Expression", frame)
+        key = cv2.waitKey(1) & 0xFF
+
+        # if the `q` key was pressed, break from the loop
+        if key == ord("q"):
+            cv2.destroyAllWindows()
+            vs.stop()
+            return label
+
+
+    # do a bit of cleanup
+    cv2.destroyAllWindows()
+    vs.stop()
+
