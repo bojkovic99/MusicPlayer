@@ -291,7 +291,7 @@ H = model.fit(
 
 # make predictions on the testing set
 print("[INFO] evaluating network...")
-predIdxs = model.predict(testX, batch_size=BS)
+predIdxs = model.predict(testX)
 print(predIdxs.shape," shape")
 
 # for each image in the testing set we need to find the index of the
