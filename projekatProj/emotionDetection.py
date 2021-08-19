@@ -68,7 +68,7 @@ def detect_and_predict_mask(frame, faceNet, maskNet, threshold):
             # add the face and bounding boxes to their respective
             # lists
             locs.append((startX, startY, endX, endY))
-            # print(maskNet.predict(face)[0].tolist())
+            #print(maskNet.predict(face)[0].tolist())
             preds.append(maskNet.predict(face)[0].tolist())
     return (locs, preds)
 

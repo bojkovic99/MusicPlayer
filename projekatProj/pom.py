@@ -22,6 +22,8 @@ def contain(item):
 
 
 def showMySongs():
+    app.getGenrePlayer().playBtn2.configure(text="Play song", command=playSongGenreMusic)
+    pygame.mixer.music.stop()
     app.getFrame2().addSongsFromDB()
     app.getFrame2().replace_menu()
     app.getFrame2().tkraise()
@@ -38,10 +40,13 @@ def removeSongFun():
     app.getFrame2().tkraise()
 
 def questionFun():
+    app.getGenrePlayer().playBtn2.configure(text="Play song", command=playSongGenreMusic)
+    pygame.mixer.music.stop()
     app.getQuestionPage().tkraise()
 
 
 def logOut():
+    app.getGenrePlayer().playBtn2.configure(text="Play song", command=playSongGenreMusic)
     pygame.mixer.music.stop()
     app.getFrame1().songName.configure(text="")
     app.getLoginPage().curUsername = ""
@@ -59,13 +64,15 @@ def logOut():
     # app.getStartPage().master.menu = app.getFrame1().menubar
 
 def emotionDetectionFun():
-    print("emotionDetectionFun")
+    pygame.mixer.music.stop()
+    app.getGenrePlayer().playBtn2.configure(text="Play song", command=playSongGenreMusic)
     app.getFrame2().addSongsFromDB()
     app.getFaceEmotionPage().tkraise()
 
 def musicGenres():
-    print("musicGenres")
     # prelaz na posebnu stranicu za musicGenre
+    app.getGenrePlayer().playBtn2.configure(text="Play song", command=playSongGenreMusic)
+    pygame.mixer.music.stop()
     app.getMusicGenre().popuniListe()
     app.getMusicGenre().tkraise()
 
@@ -91,6 +98,7 @@ def addSongFun():
 
 
 def playSongEmotion(song):
+    app.getFrame2().addSongsFromDB()
     songCut = song
     song = f'{pathSongFile}/{song}.wav'
     pygame.mixer.music.load(song)
@@ -145,13 +153,22 @@ def pauseSongGenreMusic():
     app.getGenrePlayer().playBtn2.configure(text = "Play song", command=playSongGenreMusic)
 
 def playPrevSong():
-    song2 = app.getFrame2().getSL().get(ACTIVE)
+    if app.getFrame2().getSL().get(ACTIVE) is None:
+        song2 = app.getFaceEmotionPage().songName
+    else:
+        song2 = app.getFrame2().getSL().get(ACTIVE)
+
     if song2 == app.getFrame2().getSL().get(0):
         song = app.getFrame2().getSL().get("end")
         nextOne = app.getFrame2().getSL().index("end") - 1  # index dohvata duzinu
         print(nextOne)
     else:
         nextOne = app.getFrame2().getSL().curselection()
+
+        if nextOne is None :
+            nextOne = app.getFrame2().getSL().get(0,"end").index(song2)
+            print(nextOne[0])
+
         nextOne = nextOne[0] - 1
         song = app.getFrame2().getSL().get(nextOne)
 
@@ -168,12 +185,20 @@ def playPrevSong():
 
 
 def playNextSong():
-    song2 = app.getFrame2().getSL().get(ACTIVE)
+    if app.getFrame2().getSL().get(ACTIVE) is None:
+        song2 = app.getFaceEmotionPage().songName
+    else:
+        song2 = app.getFrame2().getSL().get(ACTIVE)
+
     if song2 == app.getFrame2().getSL().get("end"):
         song = app.getFrame2().getSL().get(0)
         nextOne = 0
     else:
         nextOne = app.getFrame2().getSL().curselection()
+
+        if nextOne is None :
+            nextOne = app.getFrame2().getSL().get(0,"end").index(song2)
+
         nextOne = nextOne[0] + 1
         song = app.getFrame2().getSL().get(nextOne)
 
@@ -366,6 +391,7 @@ class Page2(Frame):
         smartPlayer = Menu(self.menubar)
 
         app.getFrame1().removeSongs.entryconfig("Remove One Song", state="normal")
+        app.getFrame1().addSong.entryconfig("Add one song", state="normal")
 
         self.master.menu = self.menubar
 
@@ -610,13 +636,14 @@ class FaceEmotionPage(Frame):
         self.infoImg = ImageTk.PhotoImage(Image.open('images/infoPNG.png').resize((25, 25)))
 
         self.emptyLabel = Label(self,
-                                text=" Please, click on camera icon to\n open your web camera.",
+                                text=" Please, click on icon to\n open your web camera.",
                                 bg="#325c86", fg="white")
         self.emptyLabel.grid(row=2, column=1)
         self.emptyLabel["compound"] = LEFT
         self.emptyLabel["image"] = self.infoImg
 
     def faceDetBtn(self):
+
         self.emotion = DetectionFun()
         print(self.emotion)
         genre = ""
@@ -642,6 +669,7 @@ class FaceEmotionPage(Frame):
                     break
 
             if(self.selectedSong == ""):
+
                 self.selectedSong =  app.getFrame2().getSL().get(0)
 
 
@@ -810,6 +838,14 @@ class MusicGenre(Frame):
                                 selectbackground="#918e91")
     def popuniListe(self):
         songs = getAllSongs(app.getLoginPage().getCurusername())
+
+        self.popList.delete(0, END)
+        self.rockList.delete(0, END)
+        self.metalList.delete(0, END)
+        self.classicList.delete(0, END)
+        self.serbianCList.delete(0, END)
+        self.technoList.delete(0, END)
+
         if songs is not None:
             for s in songs:
                 print(s)
@@ -841,19 +877,20 @@ class MusicGenre(Frame):
         self.btn1 = Button(self, image=self.popImg, bg='#103748', borderwidth=0, activebackground="#103748", command=self.playPop)
 
         self.rockImg = ImageTk.PhotoImage(Image.open('images/rock.png').resize((200, 100)))
-        self.btn2 = Button(self, image=self.rockImg, bg='#103748', borderwidth=0, activebackground="#103748")
+        self.btn2 = Button(self, image=self.rockImg, bg='#103748', borderwidth=0, activebackground="#103748", command=self.playRock)
 
         self.metalImg = ImageTk.PhotoImage(Image.open('images/metal.png').resize((200, 100)))
-        self.btn3 = Button(self, image=self.metalImg, bg='#103748', borderwidth=0, activebackground="#103748")
+        self.btn3 = Button(self, image=self.metalImg, bg='#103748', borderwidth=0, activebackground="#103748", command=self.playMetal)
 
         self.classicalImg = ImageTk.PhotoImage(Image.open('images/classical.png').resize((200, 100)))
-        self.btn4 = Button(self, image=self.classicalImg, bg='#103748', borderwidth=0, activebackground="#103748")
+        self.btn4 = Button(self, image=self.classicalImg, bg='#103748', borderwidth=0, activebackground="#103748", command=self.playClassic)
 
         self.serbianCountryImg = ImageTk.PhotoImage(Image.open('images/country.png').resize((200, 100)))
-        self.btn5 = Button(self, image=self.serbianCountryImg, bg='#103748', borderwidth=0, activebackground="#103748")
+        self.btn5 = Button(self, image=self.serbianCountryImg, bg='#103748', borderwidth=0, activebackground="#103748", command=self.playSerbianC)
 
         self.technoImg = ImageTk.PhotoImage(Image.open('images/techno.png').resize((200, 100)))
-        self.btn6 = Button(self, image=self.technoImg, bg='#103748', borderwidth=0, activebackground="#103748")
+        self.btn6 = Button(self, image=self.technoImg, bg='#103748', borderwidth=0, activebackground="#103748",
+                           command=self.playTechno)
 
         self.btn1.grid(row=1, column=1, padx=25)
         self.btn2.grid(row=1, column=2, padx=25)
@@ -873,10 +910,34 @@ class MusicGenre(Frame):
         #
         # # self.empty = Label(self, text="     ", bg='#103748')
         # # self.empty.grid(row=6, column=1)
+
     def playPop(self):
-            # prelaz na novu stranicu
-        print(self.popList.size(), " Ovo saljemo")
         app.getGenrePlayer().setSongList(self.popList)
+        app.getGenrePlayer().replace_menu()
+        app.getGenrePlayer().tkraise()
+
+    def playRock(self):
+        app.getGenrePlayer().setSongList(self.rockList)
+        app.getGenrePlayer().replace_menu()
+        app.getGenrePlayer().tkraise()
+
+    def playMetal(self):
+        app.getGenrePlayer().setSongList(self.metalList)
+        app.getGenrePlayer().replace_menu()
+        app.getGenrePlayer().tkraise()
+
+    def playTechno(self):
+        app.getGenrePlayer().setSongList(self.technoList)
+        app.getGenrePlayer().replace_menu()
+        app.getGenrePlayer().tkraise()
+
+    def playClassic(self):
+        app.getGenrePlayer().setSongList(self.classicList)
+        app.getGenrePlayer().replace_menu()
+        app.getGenrePlayer().tkraise()
+
+    def playSerbianC(self):
+        app.getGenrePlayer().setSongList(self.serbianCList)
         app.getGenrePlayer().replace_menu()
         app.getGenrePlayer().tkraise()
 
@@ -919,9 +980,12 @@ class GenrePlayer(Frame):
                 if (not (contain(s["nameSong"]))):
                     self.songList.insert(END, s["nameSong"])
 
-    def setSongList(self,songLista):
+    def setSongList(self, songLista):
+        self.songList.delete(0, END)
+        #= Listbox(self, bg='#25456a', fg="white", width=80, height=12, selectforeground="white",
+        #                   selectbackground="#22c4d6")
         for i, s in enumerate(songLista.get(0, END)):
-            print(s)
+            print(s, " stampa u funkciji setSongList")
             self.songList.insert(END, s)
 
 

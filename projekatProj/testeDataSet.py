@@ -224,7 +224,7 @@ labels = lb.fit_transform(labels)
 
 # partition the data into training and testing splits using 80% of
 # the data for training and the remaining 20% for testing
-(trainX, testX, trainY, testY) = train_test_split(data, labels,test_size=0.20, stratify=labels, random_state=123)
+(trainX, testX, trainY, testY) = train_test_split(data, labels, test_size=0.20, stratify=labels, random_state=123)
 
 # construct the training image generator for data augmentation
 """
@@ -274,7 +274,7 @@ for layer in model.layers[:-1]:
 
 # compile our model
 print("[INFO] compiling model...")
-opt = Adam(lr=INIT_LR, decay=INIT_LR / EPOCHS) # ADAM JE PROMENJEN
+# opt = Adam(lr=INIT_LR, decay=INIT_LR / EPOCHS) # ADAM JE PROMENJEN
 model.compile(loss="binary_crossentropy", optimizer="adam",
 	metrics=["accuracy"])
 

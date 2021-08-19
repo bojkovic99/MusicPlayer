@@ -8,33 +8,9 @@ import random
 import operator
 import math
 import numpy as np
+from scipy.stats._multivariate import matrix_normal_frozen
+
 from musicGenreTest import *
-
-"""
-def getNeighbors(trainingSet, instance, k):
-    distances = []
-    for x in range (len(trainingSet)):
-        dist = distance(trainingSet[x], instance, k )+ distance(instance, trainingSet[x], k)
-        distances.append((trainingSet[x][2], dist))
-    distances.sort(key=operator.itemgetter(1))
-    neighbors = []
-    for x in range(k):
-        neighbors.append(distances[x][0])
-    return neighbors
-
-def nearestClass(neighbors):
-    classVote = {}
-
-    for x in range(len(neighbors)):
-        response = neighbors[x]
-        if response in classVote:
-            classVote[response]+=1
-        else:
-            classVote[response]=1
-
-    sorter = sorted(classVote.items(), key = operator.itemgetter(1), reverse=True)
-    return sorter[0][0]
-"""
 
 def getAccuracy(testSet, predictions):
     correct = 0
@@ -50,16 +26,18 @@ i=0
 for folder in os.listdir(directory):
     i+=1
     print(directory, folder)
-    if i==11 :
+    if i==8 :
         break
     for file in os.listdir(directory+folder):
-        print(directory,folder,file)
-        (rate,sig) = wav.read(directory+folder+"/"+file)
-        mfcc_feat = mfcc(sig,rate ,winlen=0.020, appendEnergy = False)
+        print(directory, folder, file)
+        (rate, sig) = wav.read(directory+folder+"/"+file)
+        mfcc_feat = mfcc(sig, rate, nfft=960, winlen=0.020, appendEnergy=False)
+        #print(mfcc_feat, " mfcc_feat")
         covariance = np.cov(np.matrix.transpose(mfcc_feat))
         mean_matrix = mfcc_feat.mean(0)
-        feature = (mean_matrix , covariance , i)
-        pickle.dump(feature , f)
+        #print(mean_matrix, " mean_matrix")
+        feature = (mean_matrix, covariance, i)
+        pickle.dump(feature, f)
 
 f.close()
 
@@ -92,14 +70,6 @@ for x in range (leng):
 accuracy1 = getAccuracy(testSet , predictions)
 print(accuracy1)
 
-"""
-from pydub import AudioSegment
 
-# files
-src = "C:/Users/Korisnik/Desktop/faks/music/Ed Sheeran - Photograph.mp3"
-dst = "C:/Users/Korisnik/Desktop/faks/music/Ed Sheeran - Photograph-test.wav"
 
-# convert wav to mp3
-audSeg = AudioSegment.from_mp3(src)
-audSeg.export(dst, format="wav")
-"""
+

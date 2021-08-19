@@ -78,7 +78,6 @@ def detect_face(frame, faceNet):
     maxConf = -1
     maxIndex = -1
 
-
     # loop over the detections
     for i in range(0, detections.shape[2]):
         # extract the confidence (i.e., probability) associated with
@@ -103,10 +102,8 @@ def detect_face(frame, faceNet):
     return (locs)
 
 
-
-
 # Read deep learning network represented in one of the supported formats
-faceNet = cv2.dnn.readNet(prototxtPath, weightsPath)
+faceNet = cv2.dnn.readNet(weightsPath, prototxtPath)
 
 print("[INFO] Creating dataset folders...")
 create_dataset_folders(dataset_path, labels)
